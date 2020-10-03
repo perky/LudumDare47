@@ -39,6 +39,113 @@ let cache = {
     clockIndex: 0
 };
 
+const timeline = {
+    [1]: function() {
+        // TODO: lock castle gate.
+        SendMessage('🏰', 'The gate has been locked.');
+    },
+    [2]: () => {
+        SendMessage('🌼', '30 Wild Boars appear!! They are agressive and start attacking you.');
+        cache.enemies.push({
+            type: 'boar',
+            name: 'Wild Boar',
+            plural: 'Wild Boars',
+            amount: 30,
+            room: '🌼'
+        });
+    },
+    [3]: () => {
+        SendMessage('⛏', '25 Goblins appear!! They are agressive and start attacking you.');
+        cache.enemies.push({
+            type: 'goblin',
+            name: 'Goblin',
+            plural: 'Goblins',
+            amount: 25,
+            room: '⛏'
+        });
+    },
+    [6]: () => {
+        // TODO: Trader appears.
+        SendMessage('⚓', 'The Trader appears.');
+    },
+    [8]: () => {
+        SendMessage('🌵', '🗺 👉 🏰');
+    },
+    [10]: () => {
+        // TODO: send audio clue, in gardens voice,  that everyone dies in the desert at tick 16.
+    },
+    [12]: () => {
+        SendMessage('🌼', '🗺 👉 🌵');
+    },
+    [15]: () => {
+        // TODO: send audio clue, in gardens voice, that everyone dies in the gardens at tick 26.
+    },
+    [16]: () => {
+        // TODO: kill everyone in desert.
+    },
+    [20]: () => {
+        // TODO: unlock castle gate.
+        SendMessage('🏰', 'The gate has been unlocked.');
+    },
+    [25]: () => {
+        // 2/2 clue for volcanoe.
+        SendMessage('⛏', '⛓ 👉 🛎');
+    },
+    [26]: () => {
+        // TODO: everyone in gardens dies.
+    },
+    [29]: () => {
+        // TODO: send audio clue, in desert voice, that everyone dies in the volcanoe at tick 33.
+    },
+    [30]: () => {
+        SendMessage('💀', '🗺 👉 ⛏');
+    },
+    [33]: () => {
+        // TODO: everyone in volcanoe dies.
+    },
+    [40]: () => {
+        SendMessage('🌵', 'A Sand Worm appears!! They are agressive and start attacking you.');
+        cache.enemies.push({
+            type: 'sandworm',
+            name: 'Sand Worm',
+            plural: 'Sand Worms',
+            amount: 1,
+            room: '🌵'
+        });
+    },
+    [50]: () => {
+        // TODO: Trader dissapears.
+        SendMessage('⚓', 'The Trader has left.');
+    },
+    [52]: () => {
+        // 1/2 clue for volcanoe.
+        SendMessage('🏰', '🗺⛓ 👉 🌋');
+    },
+    [54]: () => {
+        SendMessage('🏰', '10 knights appear!! They are agressive and start attacking you.');
+        cache.enemies.push({
+            type: 'knight',
+            name: 'Knight',
+            plural: 'Knights',
+            amount: 10,
+            room: '🏰'
+        });
+    },
+    [55]: () => {
+        SendMessage('🏰', 'A Dragon appears!! They are agressive and start attacking you.');
+        cache.enemies.push({
+            type: 'dragon',
+            name: 'Dragon',
+            plural: 'Dragons',
+            amount: 1,
+            room: '🌋'
+        });
+    },
+    [59]: () => {
+        roomRoles.forEach(room => SendMessage(room, '💫'));
+    }
+}
+
 /**
  * The ready event is vital, it means that only _after_ this will your bot start reacting to information
  * received from Discord
@@ -64,21 +171,17 @@ function ServerTick() {
         });
     }
 
-
-    if (cache.tick === 3) {
-        SendMessage('🌼', '8 Goblins appear!! They are agressive and start attacking you.')
-        cache.enemies.push({
-            type: 'goblin',
-            name: 'Goblin',
-            plural: 'Goblins',
-            amount: 8,
-            room: '🌼'
-        });
+    for (let tick = 0; tick < 60; tick++) {
+        if (cache.tick === tick && timeline[tick]) {
+            timeline[tick]();
+            break;
+        }
     }
 
-    
-
     cache.tick++;
+    if (cache.tick === 60) {
+        cache.tick = 0;
+    }
 }
 
 function SendMessage(channelName, message) { 
