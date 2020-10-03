@@ -15,7 +15,8 @@ const rooms = ['🌼', '🌵', '🏰'];
 const channelIds = {
     '🌼': '761910391861149697',
     '🌵': '761945372179955792',
-    '🏰': '761945788107980821'
+    '🏰': '761945788107980821',
+    '💀': '761967103434555415'
 };
 
 let cache = {
@@ -38,8 +39,7 @@ client.on('ready', () => {
 function ServerTick() {
     cache.tick++;
     if (cache.tick === 3) {
-        const channel = GetChannelByName('🌼');
-        channel.send('8 Goblins appear!! They are agressive and start attacking you.');
+        SendMessage('🌼', '8 Goblins appear!! They are agressive and start attacking you.')
         cache.enemies.push({
             type: 'goblin',
             name: 'Goblin',
@@ -48,6 +48,11 @@ function ServerTick() {
             room: '🌼'
         });
     }
+}
+
+function SendMessage(channelName, message) { 
+    const channel = GetChannelByName(channelName);
+    channel.send(message);
 }
 
 function GetChannelByName(channelName) {
@@ -73,9 +78,9 @@ function SetNickname(member, name) {
 }
 
 function GotoRoom(message, room) {
-    rooms.forEach(room => RemoveRoleFromMember(message, room));
+    rooms.forEach(room => RemoveRoleFromMember(message.member, room));
     AddRoleToMember(message.member, room);
-    SetNickname(message.member, `[🔥] ${message.author.username}`);
+    //SetNickname(message.member, `[🔥] ${message.author.username}`);
 }
 
 function AttackRoomEnemy(message, enemyType, damage, optionalMessage = '') {
@@ -97,6 +102,23 @@ function AttackRoomEnemy(message, enemyType, damage, optionalMessage = '') {
     }
 }
 
+function GetEnemiesInRoom(message) {
+    let channelName = message.channel.name;
+    let enemies = cache.enemies.filter(el => {
+        return (el.room === channelName);
+    });
+    return enemies;
+}
+
+function CheckToKillPlayer(message) { 
+    let enemies = GetEnemiesInRoom(message);
+    let doDie = (Math.random() < 0.4);
+    if (enemies.length > 0 && doDie) {
+        GotoRoom(message, '💀');
+        SendMessage('💀', `Welcome to the dead, ${message.author}`);
+    }
+}
+
 const msgCommands = {
     '🚶‍♂️': {
         '🌼': function (message) { GotoRoom(message, '🌼'); },
@@ -111,8 +133,11 @@ const msgCommands = {
             AttackRoomEnemy(message, 'goblin', 3, 'BOOM! The goblins explode in a fiery blast.');
         },
         'default': function(message) {
-
+            CheckToKillPlayer(message);
         }
+    },
+    'default': function (message) {
+        CheckToKillPlayer(message);
     }
 };
 
@@ -126,8 +151,10 @@ client.on('message', message => {
     if (validMessage) {
         // Command parser.
         let msg = message.content.replace(/\s/, '');
+        let foundCmd = false;
         for (const [cmd, cmdArgs] of Object.entries(msgCommands)) {
             if (msg.startsWith(cmd)) {
+                foundCmd = true;
                 msg = msg.replace(cmd, '').replace(' ', '');
                 let foundArg = false;
                 for (const [cmdArg, func] of Object.entries(cmdArgs)) {
@@ -142,6 +169,9 @@ client.on('message', message => {
                 }
                 break;
             }
+        }
+        if (!foundCmd && msgCommands['default']) {
+            msgCommands['default'](message);
         }
     }
 });
