@@ -14,6 +14,7 @@ const nonEmojiPattern = /[A-Za-z0-9]/u;
 const rooms = ['🌼', '🌵', '🏰'];
 const channelIds = {
     '🌼': '761910391861149697',
+    '🌼🎵': '761970667918065704',
     '🌵': '761945372179955792',
     '🏰': '761945788107980821',
     '💀': '761967103434555415'
@@ -80,7 +81,7 @@ function SetNickname(member, name) {
 function GotoRoom(message, room) {
     rooms.forEach(room => RemoveRoleFromMember(message.member, room));
     AddRoleToMember(message.member, room);
-    //SetNickname(message.member, `[🔥] ${message.author.username}`);
+    message.member.setVoiceChannel(GetChannelByName('🌼🎵'));
 }
 
 function AttackRoomEnemy(message, enemyType, damage, optionalMessage = '') {
