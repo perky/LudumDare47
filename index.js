@@ -2,6 +2,7 @@
 const Discord = require('discord.js');
 // Create an instance of a Discord client
 const client = new Discord.Client();
+const secrets = require('./secrets.js');
 
 let cache = {
     roles: {},
@@ -82,4 +83,4 @@ client.on('message', message => {
         }
     }
 });
-client.login('NzYxNzM5ODMzMDU5MTgwNTU2.X3e_gA.fzKdpM26fVKBzW6OFjjAWVke1gA');
+client.login(secrets.botToken);
