@@ -12,6 +12,7 @@ const encoder = new OpusEncoder(48000, 2);
 
 const nonEmojiPattern = /[A-Za-z0-9]/u;
 const roomRoles = ['🌼', '🌵', '🏰', '💀', '⛏', '🌋', '⚓'];
+const clockfaces = ['🕛','🕐','🕑','🕒','🕓','🕔','🕕','🕖','🕗','🕘','🕙','🕚']
 const channelIds = {
     '🌼': '761910391861149697',
     '🌼🎵': '761970667918065704',
@@ -34,7 +35,8 @@ let cache = {
     teams: {},
     locations: {},
     enemies: [],
-    tick: 0
+    tick: 0,
+    clockIndex: 0
 };
 
 /**
@@ -47,7 +49,22 @@ client.on('ready', () => {
 });
 
 function ServerTick() {
-    cache.tick++;
+    // CLEAR MESSAGES AND UPDATE CLOCK.
+    if (cache.tick === 0 || cache.tick % 5 === 0) {
+        roomRoles.forEach(room => {
+            GetChannelByName(room).bulkDelete(100);
+            const clockIcon = clockfaces[Math.floor((cache.tick % 60) / 5)];
+            SendMessage(room, clockIcon);
+            client.user.setActivity(`${clockIcon}`);
+            let enemies = GetEnemiesInRoom(room);
+            enemies.forEach(enemy => {
+                let enemyName = (enemy.amount === 1) ? enemy.name : enemy.plural;
+                SendMessage(room, `There are ${enemy.amount} ${enemyName} still alive.`);
+            });
+        });
+    }
+
+
     if (cache.tick === 3) {
         SendMessage('🌼', '8 Goblins appear!! They are agressive and start attacking you.')
         cache.enemies.push({
@@ -59,16 +76,9 @@ function ServerTick() {
         });
     }
 
-    if (cache.tick === 1 || cache.tick % 12 === 0) {
-        roomRoles.forEach(room => {
-            GetChannelByName(room).bulkDelete(100);
-            let enemies = GetEnemiesInRoom(room);
-            enemies.forEach(enemy => {
-                let enemyName = (enemy.amount === 1) ? enemy.name : enemy.plural;
-                SendMessage(room, `There are ${enemy.amount} ${enemyName} still alive.`);
-            });
-        });
-    }
+    
+
+    cache.tick++;
 }
 
 function SendMessage(channelName, message) { 
