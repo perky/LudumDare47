@@ -149,15 +149,15 @@ function CheckToKillPlayer(message) {
     }
 }
 
-function JoinAllVoiceChannels(message)
+async function JoinAllVoiceChannels(message)
 {
     let flipFlop = true;
-    for (let index = 0; index < channelIds.length; index++) {
+    for (const [name, id] of Object.entries(channelIds)) {
         flipFlop = !flipFlop;
-        if (flipFlop){
-            client.channels.cache.get(channelIds[index]).join();
+        if (flipFlop) {
+            await client.channels.cache.get(id).join();
         }
-    }      
+    }
 }
 
 const msgCommands = {
