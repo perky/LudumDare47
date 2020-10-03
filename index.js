@@ -11,7 +11,7 @@ const { OpusEncoder } = require('@discordjs/opus');
 const encoder = new OpusEncoder(48000, 2);
 
 const nonEmojiPattern = /[A-Za-z0-9]/u;
-const rooms = ['🌼', '🌵', '🏰'];
+const roomRoles = ['🌼', '🌵', '🏰', '💀'];
 const channelIds = {
     '🌼': '761910391861149697',
     '🌼🎵': '761970667918065704',
@@ -79,9 +79,9 @@ function SetNickname(member, name) {
 }
 
 function GotoRoom(message, room) {
-    rooms.forEach(room => RemoveRoleFromMember(message.member, room));
+    roomRoles.forEach(role => RemoveRoleFromMember(message.member, role));
     AddRoleToMember(message.member, room);
-    message.member.voice.setChannel(GetChannelByName('🌼🎵'));
+    message.member.voice.setChannel(GetChannelByName('🌼🎵')).catch(()=>{});
 }
 
 function AttackRoomEnemy(message, enemyType, damage, optionalMessage = '') {
