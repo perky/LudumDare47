@@ -149,6 +149,17 @@ function CheckToKillPlayer(message) {
     }
 }
 
+function JoinAllVoiceChannels(message)
+{
+    let flipFlop = true;
+    for (let index = 0; index < channelIds.length; index++) {
+        flipFlop = !flipFlop;
+        if (flipFlop){
+           channelIds[index].join();
+        }
+    }      
+}
+
 const msgCommands = {
     '🚶‍♂️': {
         '🌼': function (message) { GotoRoom(message, '🌼'); },
@@ -167,6 +178,11 @@ const msgCommands = {
         },
         'default': function(message) {
             CheckToKillPlayer(message);
+        }
+    },
+    '📃':{
+        '🎶': function (message){
+            JoinAllVoiceChannels(message);
         }
     },
     'default': function (message) {
