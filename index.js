@@ -6,10 +6,13 @@ const secrets = require('./secrets.js');
 
 // VOICE STUFF
 const { OpusEncoder } = require('@discordjs/opus');
+const fs = require('fs');
 // Create the encoder.
 // Specify 48kHz sampling rate and 2 channel size.
 const encoder = new OpusEncoder(48000, 2);
 
+const guildId = '761906017654538260';
+const homeChannelId = '761906017654538264';
 const nonEmojiPattern = /[A-Za-z0-9]/u;
 const roomRoles = ['🌼', '🌵', '🏰', '💀', '⛏', '🌋', '⚓'];
 const clockfaces = ['🕛','🕐','🕑','🕒','🕓','🕔','🕕','🕖','🕗','🕘','🕙','🕚']
@@ -30,21 +33,29 @@ const channelIds = {
     '🌋🎵': '761986404711530556'
 };
 
-let cache = {
-    roles: {},
-    teams: {},
-    locations: {},
-    enemies: [],
-    tick: 0,
-    clockIndex: 0
-};
+let cache = {};
+function SetupCache() {
+    cache = {
+        roles: {},
+        teams: {},
+        locations: {},
+        enemies: [],
+        castleLocked: false,
+        tick: 0,
+        clockIndex: 0
+    };
+}
 
 const timeline = {
     [1]: function() {
-        // TODO: lock castle gate.
-        SendMessage('🏰', 'The gate has been locked.');
+        // LOCK CASTLE
+        cache.castleLocked = true;
+        SendMessage('🏰', '🏰🔒');
     },
     [2]: () => {
+        SendMessage('🌼', '[Boar] 🪓 👉 💀');
+    },
+    [3]: () => {
         SendMessage('🌼', '30 Wild Boars appear!! They are agressive and start attacking you.');
         cache.enemies.push({
             type: 'boar',
@@ -53,8 +64,9 @@ const timeline = {
             amount: 30,
             room: '🌼'
         });
+        PlaySoundInVoiceChannel('🌵🎵', 'WildBoarHerd.mp3');
     },
-    [3]: () => {
+    [4]: () => {
         SendMessage('⛏', '25 Goblins appear!! They are agressive and start attacking you.');
         cache.enemies.push({
             type: 'goblin',
@@ -64,44 +76,70 @@ const timeline = {
             room: '⛏'
         });
     },
+    [5]: () => {
+
+    },
     [6]: () => {
         // TODO: Trader appears.
         SendMessage('⚓', 'The Trader appears.');
     },
     [8]: () => {
+        // CASTLE CLUE
         SendMessage('🌵', '🗺 👉 🏰');
     },
     [10]: () => {
         // TODO: send audio clue, in gardens voice,  that everyone dies in the desert at tick 16.
+        PlaySoundInVoiceChannel('🌼🎵', 'placeholder.mp3');
     },
     [12]: () => {
+        // DESERT CLUE
         SendMessage('🌼', '🗺 👉 🌵');
     },
     [15]: () => {
         // TODO: send audio clue, in gardens voice, that everyone dies in the gardens at tick 26.
+        PlaySoundInVoiceChannel('🌼🎵', 'placeholder.mp3');
     },
     [16]: () => {
-        // TODO: kill everyone in desert.
+        // DESERT BOMB
+        SendMessage('🌵', '💣👿');
+        setTimeout(() => {
+            KillAllPlayersWithRole('🌵');
+            SendMessage('💀', '💣 👉 💀💀💀');
+        }, 1000);
     },
     [20]: () => {
-        // TODO: unlock castle gate.
-        SendMessage('🏰', 'The gate has been unlocked.');
+        // UNLOCK CASTLE.
+        cache.castleLocked = false;
+        SendMessage('🏰', '🏰🔓');
+        SendMessage('💀', '🏰🔓');
     },
     [25]: () => {
         // 2/2 clue for volcanoe.
         SendMessage('⛏', '⛓ 👉 🛎');
     },
     [26]: () => {
-        // TODO: everyone in gardens dies.
+        // GARDENS BOMB
+        SendMessage('🌼', '💣👿');
+        setTimeout(() => {
+            KillAllPlayersWithRole('🌼');
+            SendMessage('💀', '💣 👉 💀💀💀');
+        }, 1000);
     },
     [29]: () => {
         // TODO: send audio clue, in desert voice, that everyone dies in the volcanoe at tick 33.
+        PlaySoundInVoiceChannel('🌵🎵', 'placeholder.mp3');
     },
     [30]: () => {
+        // MINE CLUE
         SendMessage('💀', '🗺 👉 ⛏');
     },
     [33]: () => {
-        // TODO: everyone in volcanoe dies.
+        // VOLCANO BOMB
+        SendMessage('🌋', '🌋🔥🔥');
+        setTimeout(() => {
+            KillAllPlayersWithRole('🌋');
+            SendMessage('💀', '🌋🔥🔥 👉 💀💀💀');
+        }, 1000);
     },
     [40]: () => {
         SendMessage('🌵', 'A Sand Worm appears!! They are agressive and start attacking you.');
@@ -152,8 +190,22 @@ const timeline = {
  */
 client.on('ready', () => {
     console.log('I am ready!');
+    OnLoopStart();
     setInterval(ServerTick, 5000);
 });
+
+function OnLoopStart() {
+    SetupCache();
+    // Remove all room roles from members on loop (re)start.
+    client.guilds.fetch(guildId).then(guild => {
+        guild.members.fetch().then(members => {
+            members.forEach(member => {
+                roomRoles.forEach(role => { RemoveRoleFromMember(member, role); });
+            });
+        }).catch(console.error);
+    });
+    client.channels.cache.get(homeChannelId).send('⏰🌌');
+}
 
 function ServerTick() {
     // CLEAR MESSAGES AND UPDATE CLOCK.
@@ -181,6 +233,7 @@ function ServerTick() {
     cache.tick++;
     if (cache.tick === 60) {
         cache.tick = 0;
+        OnLoopStart();
     }
 }
 
@@ -193,25 +246,46 @@ function GetChannelByName(channelName) {
     return client.channels.cache.get(channelIds[channelName]);
 }
 
+function GetRoleByName(guild, roleName) {
+    return guild.roles.cache.find(role => role.name === roleName);
+}
+
 function AddRoleToMember(member, roleName) {
-    const role = member.guild.roles.cache.find(role => role.name === roleName);
+    const role = GetRoleByName(member.guild, roleName);
     member.roles.add(role);
 }
 
 function RemoveRoleFromMember(member, roleName) {
-    const role = member.guild.roles.cache.find(role => role.name === roleName);
+    const role = GetRoleByName(member.guild, roleName);
     member.roles.remove(role);
 }
 
-function DoesMemberHaveRole(member, roleName) {
-
+function KillAllPlayersWithRole(roleName) {
+    client.guilds.fetch(guildId).then(guild => {
+        const role = GetRoleByName(guild, roleName);
+        role.members.forEach(member => {
+            RemoveRoleFromMember(member, roleName);
+            AddRoleToMember(member, '💀');
+        });
+    });
 }
 
 function SetNickname(member, name) {
     member.setNickname(name);
 }
 
+function MemberHasRole(member, roleName) {
+    return member.roles.cache.find(role => role.name === roleName);
+}
+
 function GotoRoom(message, room) {
+    if (MemberHasRole(message.member, '💀')) {
+        return;
+    }
+    if (MemberHasRole(message.member, '🏰') && cache.castleLocked) {
+        message.channel.send('🏰🔒');
+        return;
+    }
     roomRoles.forEach(role => RemoveRoleFromMember(message.member, role));
     AddRoleToMember(message.member, room);
     message.member.voice.setChannel(GetChannelByName('🌼🎵')).catch(()=>{});
@@ -243,44 +317,69 @@ function GetEnemiesInRoom(room) {
     return enemies;
 }
 
-function CheckToKillPlayer(message) { 
+function CheckToKillPlayer(message, killChance = 0.5) { 
     let enemies = GetEnemiesInRoom(message.channel.name);
-    let doDie = (Math.random() < 0.4);
+    let doDie = (Math.random() < killChance);
     if (enemies.length > 0 && doDie) {
         GotoRoom(message, '💀');
         SendMessage('💀', `Welcome to the dead, ${message.author}`);
     }
 }
 
-async function JoinAllVoiceChannels(message)
-{
-    let flipFlop = true;
-    for (const [name, id] of Object.entries(channelIds)) {
-        flipFlop = !flipFlop;
-        if (flipFlop) {
-            await client.channels.cache.get(id).join();
-        }
-    }
+function PlaySoundInVoiceChannel(channelName, soundPath) {
+    GetChannelByName(channelName).join().then(connection => {
+        const dispatcher = connection.play(`assets/${soundPath}`);
+        dispatcher.on('error', console.error);
+    });
 }
 
 const msgCommands = {
     '🚶‍♂️': {
         '🌼': function (message) { GotoRoom(message, '🌼'); },
         '🌵': function (message) { GotoRoom(message, '🌵'); },
-        '🏰': function (message) { GotoRoom(message, '🏰'); },
+        '🏰': function (message) {
+            if (cache.castleLocked) {
+                message.channel.send("🏰🔒");
+            } else {
+                GotoRoom(message, '🏰'); 
+            }
+        },
+        '⚓': function (message) { GotoRoom(message, '⚓'); },
+        '⛏': function (message) { GotoRoom(message, '⛏'); },
+        '🌋🛎': function (message) { GotoRoom(message, '🌋'); },
+        '🌋': function (message) { message.channel.send('🚶‍♂️🌋❓'); },
         'default': function (message) {
             CheckToKillPlayer(message);
         }
     },
     '⚔': {
         '🪓': function (message) {
-            AttackRoomEnemy(message, 'goblin', 1, '<:Test:761943769695518730> A goblin is cleaved in half.');
+            AttackRoomEnemy(message, 'goblin', 1, 'A goblin is cleaved in half.');
+            AttackRoomEnemy(message, 'boar', 1, 'boar killed [placeholder]');
+            AttackRoomEnemy(message, 'knight', 1, 'knight killed [placeholder]');
+            AttackRoomEnemy(message, 'sandworm', 1, 'knight killed [placeholder]');
+            AttackRoomEnemy(message, 'dragon', 1, 'knight killed [placeholder]');
         },
         '🔥': function (message) {
             AttackRoomEnemy(message, 'goblin', 3, 'BOOM! The goblins explode in a fiery blast.');
         },
+        '🗡️': function (message) {},
+        '🔫': function (message) {},
+        '🔪': function (message) {},
+        '💣': function (message) {},
+        '🥄': function (message) {
+            CheckToKillPlayer(message, 1);
+        },
+        '🚀': function (message) {},
+        '✂': function (message) {},
         'default': function(message) {
             CheckToKillPlayer(message);
+        }
+    },
+    '🖐': {
+        '🎲': function (message) {
+            const roll = Math.floor(Math.random() * 6) + 1;
+            message.channel.send(`🎲 👉 ${roll}`);
         }
     },
     '📃':{
