@@ -81,7 +81,7 @@ function SetNickname(member, name) {
 function GotoRoom(message, room) {
     rooms.forEach(room => RemoveRoleFromMember(message.member, room));
     AddRoleToMember(message.member, room);
-    message.member.setVoiceChannel(GetChannelByName('🌼🎵'));
+    message.member.voice.setChannel(GetChannelByName('🌼🎵'));
 }
 
 function AttackRoomEnemy(message, enemyType, damage, optionalMessage = '') {
