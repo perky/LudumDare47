@@ -155,7 +155,7 @@ function JoinAllVoiceChannels(message)
     for (let index = 0; index < channelIds.length; index++) {
         flipFlop = !flipFlop;
         if (flipFlop){
-           channelIds[index].join();
+            client.channels.cache.get(channelIds[index]).join();
         }
     }      
 }
