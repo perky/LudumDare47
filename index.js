@@ -11,13 +11,22 @@ const { OpusEncoder } = require('@discordjs/opus');
 const encoder = new OpusEncoder(48000, 2);
 
 const nonEmojiPattern = /[A-Za-z0-9]/u;
-const roomRoles = ['🌼', '🌵', '🏰', '💀'];
+const roomRoles = ['🌼', '🌵', '🏰', '💀', '⛏', '🌋', '⚓'];
 const channelIds = {
     '🌼': '761910391861149697',
     '🌼🎵': '761970667918065704',
     '🌵': '761945372179955792',
+    '🌵🎵': '761986095386722344',
     '🏰': '761945788107980821',
-    '💀': '761967103434555415'
+    '🏰🎵': '761986231978426411',
+    '💀': '761967103434555415',
+    '💀🎵': '761986741917581353',
+    '⚓': '761985696709214238',
+    '⚓🎵': '761986507355455499',
+    '⛏': '761985528224022548',
+    '⛏🎵': '761986307097493575',
+    '🌋': '761985625363578910',
+    '🌋🎵': '761986404711530556'
 };
 
 let cache = {
@@ -34,7 +43,7 @@ let cache = {
  */
 client.on('ready', () => {
     console.log('I am ready!');
-    setInterval(ServerTick, 5);
+    setInterval(ServerTick, 5000);
 });
 
 function ServerTick() {
@@ -47,6 +56,17 @@ function ServerTick() {
             plural: 'Goblins',
             amount: 8,
             room: '🌼'
+        });
+    }
+
+    if (cache.tick === 1 || cache.tick % 12 === 0) {
+        roomRoles.forEach(room => {
+            GetChannelByName(room).bulkDelete(100);
+            let enemies = GetEnemiesInRoom(room);
+            enemies.forEach(enemy => {
+                let enemyName = (enemy.amount === 1) ? enemy.name : enemy.plural;
+                SendMessage(room, `There are ${enemy.amount} ${enemyName} still alive.`);
+            });
         });
     }
 }
@@ -103,16 +123,15 @@ function AttackRoomEnemy(message, enemyType, damage, optionalMessage = '') {
     }
 }
 
-function GetEnemiesInRoom(message) {
-    let channelName = message.channel.name;
+function GetEnemiesInRoom(room) {
     let enemies = cache.enemies.filter(el => {
-        return (el.room === channelName);
+        return (el.room === room);
     });
     return enemies;
 }
 
 function CheckToKillPlayer(message) { 
-    let enemies = GetEnemiesInRoom(message);
+    let enemies = GetEnemiesInRoom(message.channel.name);
     let doDie = (Math.random() < 0.4);
     if (enemies.length > 0 && doDie) {
         GotoRoom(message, '💀');
@@ -125,6 +144,9 @@ const msgCommands = {
         '🌼': function (message) { GotoRoom(message, '🌼'); },
         '🌵': function (message) { GotoRoom(message, '🌵'); },
         '🏰': function (message) { GotoRoom(message, '🏰'); },
+        'default': function (message) {
+            CheckToKillPlayer(message);
+        }
     },
     '⚔': {
         '🪓': function (message) {
