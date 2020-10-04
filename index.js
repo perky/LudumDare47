@@ -54,7 +54,7 @@ const timeline = {
         SendMessage('🏰', '🏰🔒');
     },
     [2]: () => {
-        SendMessage('🌼', '🪓🐗 👉 💀');
+        SendMessage('🌼', '🧩 ⚔🪓 👉 🐗');
     },
     [3]: () => {
         SpawnEnemies({
@@ -63,6 +63,7 @@ const timeline = {
             plural: 'Wild Boars',
             icon: '🐗',
             image: 'Boar.png',
+            reward: '🧩 🚶‍♂️🌵',
             amount: 15,
             room: '🌼'
         });
@@ -75,40 +76,42 @@ const timeline = {
             plural: 'Goblins',
             icon: '👺',
             image: 'Goblin.png',
+            reward: '🧩 ⚔💰 👉 🛡',
             amount: 10,
             room: '⛏'
         });
         PlaySoundInVoiceChannel('⛏🎵', 'GoblinAppears.mp3');
     },
     [5]: () => {
-        SendMessage('🌼', '🍪🐗 👉 💀💀💀');
+        SendMessage('🌼', '🧩 ⚔🍪 👉⭐ 🐗');
     },
     [6]: () => {
         // TODO: Trader appears.
         cache.trader = true;
-        SendMessage('⚓', 'The Trader appears.');
+        SendMessage('⚓', '👩‍💼👋');
+        SendMessage('🌋', '👩‍💼❤♟');
         PlaySoundInVoiceChannel('⚓🎵', 'TraderArrives.mp3');
     },
     [8]: () => {
         // CASTLE CLUE
-        SendMessage('🌵', '🗺 👉 🏰');
+        SendMessage('🌵', '🧩 🗺🏰');
     },
     [9]: () => {
-        SendMessage('⚓', '🧊🐛 👉 🤕');
+        SendMessage('⚓', '🧩 ⚔🧊 👉 🐛');
     },
     [10]: () => {
         // audio clue, in gardens voice, that everyone dies in the desert at tick 16.
         PlaySoundInVoiceChannel('🌼🎵', 'desert_bomb_clue.mp3');
     },
     [11]: () => {
-        SendMessage('⚓', '💰🛡 👉 💀💀💀');
+        SendMessage('⚓', '🧩 ⚔💰 👉⭐ 🛡');
     },
     [12]: () => {
         // DESERT CLUE
-        SendMessage('🌼', '🗺 👉 🌵');
+        SendMessage('🌼', '🧩 🗺🌵');
     },
     [14]: () => {
-        SendMessage('⚓', '🧨🛡 👉 ⛔');
+        SendMessage('⚓', '🧩 ⚔🧨 👉⛔ 🛡');
     },
     [15]: () => {
         // audio clue, in harbour voice, that everyone dies in the gardens at tick 26.
@@ -116,36 +119,42 @@ const timeline = {
     },
     [16]: () => {
         // DESERT BOMB
-        SendMessage('🌵', '🧨⏰👿');
+        SendMessage('🌵', '🧨⏰');
         setTimeout(() => {
             KillAllPlayersWithRole('🌵');
-            SendMessage('💀', '🧨⏰ 👉 💀💀💀');
-        }, 2000);
+            SendMessage('💀', '🧩 🧨⏰ 👉 💀💀💀');
+        }, 3000);
     },
     [17]: () => {
-        SendMessage('🌼', '🔥👺 👉 💀💀💀');
+        SendMessage('🌼', '🧩 ⚔🔥 👉⭐ 👺');
     },
     [20]: () => {
         // UNLOCK CASTLE.
         cache.castleLocked = false;
         SendMessage('🏰', '🏰🔓');
         SendMessage('💀', '🏰🔓');
+        PlaySoundInVoiceChannel('🏰🎵', 'CastleGateOpens.mp3');
     },
     [21]: () => {
-        SendMessage('🌵', '🔪🛡 👉 💀');
+        SendMessage('🌵', '🧩 ⚔🔪 👉 🛡');
     },
     [25]: () => {
         // 2/2 clue for volcanoe.
-        SendMessage('⛏', '⛓ 👉 🛎');
+        SendMessage('⛏', '🧩 🌋🛎');
     },
     [26]: () => {
         // GARDENS BOMB
-        SendMessage('🌼', '🧨⏰👿');
+        SendMessage('🌼', '🧨⏰');
         PlaySoundInVoiceChannel('🌼🎵', 'WildBoarHerd.mp3');
         setTimeout(() => {
             KillAllPlayersWithRole('🌼');
-            SendMessage('💀', '🧨⏰ 👉 💀💀💀');
-        }, 2000);
+            SendMessage('💀', '🧩 🧨⏰ 👉 💀💀💀');
+        }, 3000);
+    },
+    [28]: () => {
+        // TODO: Trader dissapears.
+        cache.trader = false;
+        SendMessage('⚓', '👩‍💼✈');
     },
     [29]: () => {
         // audio clue, in mine voice, that everyone dies in the volcanoe at tick 33.
@@ -153,14 +162,14 @@ const timeline = {
     },
     [30]: () => {
         // MINE CLUE
-        SendMessage('💀', '🗺 👉 ⛏');
+        SendMessage('💀', '🧩 🗺⛏');
     },
     [31]: () => {
         // RESURRECT THE DEAD.
         SendMessage('💀', '🧙‍♂️ 💀👉😃');
         setTimeout(() => {
             MoveDeadPlayersToRoom('⚓');
-            SendMessage('⚓', '🧙‍♂️ 💀👉⚓');
+            SendMessage('⚓', '🧩 🖐🧙‍♂️ 💀👉⚓');
         }, 3000);
     },
     [33]: () => {
@@ -169,13 +178,13 @@ const timeline = {
         PlaySoundInVoiceChannel('🌋🎵', 'VolcanicEruption.mp3');
         setTimeout(() => {
             KillAllPlayersWithRole('🌋');
-            SendMessage('💀', '🌋🔥🔥 👉 💀💀💀');
-        }, 2000);
+            SendMessage('💀', '🧩 🌋🔥🔥 👉 💀💀💀');
+        }, 3000);
     },
     [34]: () => {
-        SendMessage('💀', '🪓👺 👉 ⛔');
+        SendMessage('💀', '🧩 ⚔🪓 👉⛔ 👺');
         setTimeout(() => {
-            SendMessage('💀', '🍪👺 👉 ⛔');
+            SendMessage('💀', '🧩 ⚔🍪 👉⛔ 👺');
         }, 2000);
     },
     [35]: () => {
@@ -185,6 +194,7 @@ const timeline = {
             plural: 'Wild Boars',
             icon: '🐗',
             image: 'Boar.png',
+            reward: '🧩 ⚔🍉 👉 🐛',
             amount: 10,
             room: '🌼'
         });
@@ -197,18 +207,24 @@ const timeline = {
             plural: 'Slimes',
             icon: '🟩',
             image: 'Slime.png',
+            reward: '🧩 ⚔🐁 👉 🐉',
             amount: 20,
             room: '⛏'
         });
+        PlaySoundInVoiceChannel('⛏🎵', 'SlimeAppears.mp3');
+    },
+    [39]: () => {
         SpawnEnemies({
             type: 'slime',
             name: 'Slime',
             plural: 'Slimes',
             image: 'Slime.png',
+            reward: '🧩 ⚔🔥 👉⛔ 🐉',
             icon: '🟩',
             amount: 5,
             room: '🌋'
         });
+        PlaySoundInVoiceChannel('🌋🎵', 'SlimeAppears.mp3');
     },
     [40]: () => {
         PlaySoundInVoiceChannel('🌵🎵', 'SandWormAppears.mp3');
@@ -219,25 +235,26 @@ const timeline = {
             amount: 1,
             icon: '🏜🐛',
             image: 'Sand_Worm.png',
+            reward: '🧩 ⚔🍆 👉⛔ 🟩',
             hp: 25,
             useHp: true,
             room: '🌵'
         });
     },
     [41]: () => {
-        SendMessage('💀', '💩🐗 👉 ⛔');
+        SendMessage('💀', '🧩 ⚔💩 👉⛔ 🐗');
         setTimeout(() => {
-            SendMessage('💀', '🍔🐗 👉 ⛔');
+            SendMessage('💀', '🧩 ⚔🍔 👉⛔ 🐗');
         }, 2000);
     },
     [42]: () => {
-        SendMessage('⚓', '🔫👺 👉 💀');
+        SendMessage('⚓', '🧩 ⚔🔫 👉 👺');
         setTimeout(() => {
-            SendMessage('⚓', '🗡👺 👉 💀');
+            SendMessage('⚓', '🧩 ⚔🗡 👉 👺');
         }, 2000);
     },
     [43]: () => {
-        SendMessage('🏰', '🪓🐉 👉 ⛔');
+        SendMessage('🏰', '🧩 ⚔🪓 👉⛔ 🐉');
     },
     [45]: () => {
         SpawnEnemies({
@@ -246,25 +263,24 @@ const timeline = {
             plural: 'Goblins',
             icon: '👺',
             image: 'Goblin.png',
+            reward: '🧩 🚶‍♂️🏰',
             amount: 7,
             room: '🌵'
         });
         PlaySoundInVoiceChannel('🌵🎵', 'GoblinAppears.mp3');
     },
     [46]: () => {
-        SendMessage('⛏', '🚿🐛 👉 🤕🤕🤕');
+        SendMessage('⛏', '🧩 ⚔🚿 👉⭐ 🐛');
     },
     [50]: () => {
-        // TODO: Trader dissapears.
-        cache.trader = false;
-        SendMessage('⚓', 'The Trader has left.');
+        
     },
     [52]: () => {
         // 1/2 clue for volcanoe.
-        SendMessage('🏰', '🗺 👉 ⛓ 👉 🌋');
+        SendMessage('🏰', '🧩 🗺🌋');
     },
     [53]: () => {
-        SendMessage('🌼', '🎷🐛 👉 ⛔');
+        SendMessage('🌼', '🧩  ⚔🎷 👉⛔ 🐛');
     },
     [54]: () => {
         SpawnEnemies({
@@ -273,6 +289,7 @@ const timeline = {
             plural: 'Knights',
             icon: '🛡',
             image: 'Knight.png',
+            reward: '🧩 🚶‍♂️🌋',
             amount: 5,
             room: '🏰'
         });
@@ -285,6 +302,7 @@ const timeline = {
             plural: 'Dragons',
             icon: '🐉',
             image: 'Dragon.png',
+            reward: '👑',
             amount: 1,
             hp: 50,
             useHp: true,
@@ -293,7 +311,7 @@ const timeline = {
         PlaySoundInVoiceChannel('🌋🎵', 'DragonAppears.mp3');
     },
     [58]: () => {
-        SendMessage('🌵', '🐁🐉 👉 🤕');
+        SendMessage('🌵', '🧩 ⚔🐁 👉 🐉');
     },
     [59]: () => {
         roomRoles.forEach(room => SendMessage(room, '💫'));
@@ -434,6 +452,9 @@ function AttackRoomEnemy(message, enemyType, damage) {
                 cache.enemies.splice(idx, 1);
                 message.react('💀');
                 message.channel.send(`💀 ${enemy.icon} 💀`);
+                if (enemy.reward) {
+                    message.channel.send(enemy.reward);
+                }
                 if (enemy.type === 'dragon') {
                     message.react('👑');
                     MakeWinners(message.channel);
@@ -450,6 +471,9 @@ function AttackRoomEnemy(message, enemyType, damage) {
                 cache.enemies.splice(idx, 1);
                 message.react('💀');
                 message.channel.send(`💀 ${enemy.icon} 💀`);
+                if (enemy.reward) {
+                    message.channel.send(enemy.reward);
+                }
             } else {
                 if (enemy.amount % 5 === 0) {
                     message.channel.send(`😡‼ ${enemy.icon.repeat(enemy.amount)} ‼😡`);
@@ -537,7 +561,7 @@ const msgCommands = {
         '🌋': function (message) { message.channel.send('🚶‍♂️🌋❓'); },
         'default': function (message) {
             message.react('❌');
-            KillPlayerIfAnyEnemyExists(message);
+            KillPlayerIfAnyEnemyExists(message, 0.1);
         }
     },
     '⚔': {
@@ -644,7 +668,7 @@ const msgCommands = {
             KillPlayerIfAnyEnemyExists(message, 1);
         },
         'default': function(message) {
-            KillPlayerIfAnyEnemyExists(message);
+            KillPlayerIfAnyEnemyExists(message, 0.5);
             message.react('❌');
         }
     },
@@ -655,6 +679,30 @@ const msgCommands = {
         },
         '🧙‍♂️': function (message) {
             RemoveRoleFromMember(message.member, '💀');
+        },
+        '♟': function (message) {
+            if (message.channel.name === '⚓' && cache.trader) {
+                AddRoleToMember(message.member, '👑');
+            }
+        },
+        '🐗': function (message) {
+            message.react('💋');
+            message.react('🐗');
+        },
+        '🐴': function (message) {
+            SendMessage('💀', '', 'Hors.png');
+        }
+    },
+    '🐴': {
+        'default': function (message) {
+            SendMessage('💀', '', 'Hors.png');
+        }
+    },
+    '👋': {
+        'default': function (message) {
+            if (message.channel.name === '⚓' && cache.trader) {
+                message.react('👋');
+            }
         }
     },
     '📃':{
@@ -662,11 +710,12 @@ const msgCommands = {
         }
     },
     'default': function (message) {
-        KillPlayerIfAnyEnemyExists(message);
+        KillPlayerIfAnyEnemyExists(message, 0.1);
     }
 };
 
 const cmdAliases = {
+    '🚶‍♀️': '🚶‍♂️',
     '🚗': '🚶‍♂️',
     '🦵': '🚶‍♂️',
     '🚂': '🚶‍♂️',
@@ -684,6 +733,9 @@ const cmdAliases = {
     '🛴': '🚶‍♂️',
     '🏍': '🚶‍♂️',
     '✈': '🚶‍♂️',
+    '🐎': '🐴',
+    '🏇': '🐴',
+    '🎠': '🐴',
 };
 const argAliases = {
     '🌻': '🌼',
@@ -697,7 +749,11 @@ const argAliases = {
     '🗻': '🌋',
     '🏯': '🏰',
     '🐭': '🐁',
-    '💣': '🧨'
+    '💣': '🧨',
+    '🧙‍♀️': '🧙‍♂️',
+    '🐎': '🐴',
+    '🏇': '🐴',
+    '🎠': '🐴',
 };
 
 function IsAlias(aliasList, predicateValue, msg) {
@@ -713,7 +769,7 @@ client.on('message', message => {
     if (message.author.bot) return;
 
     let validMessage = !nonEmojiPattern.test(message.content);
-    if (!validMessage && message.channel.name != '👑') {
+    if (!validMessage && message.channel.name != '👑' && message.channel.name != 'feedback') {
         message.delete();
     }
     if (validMessage) {
