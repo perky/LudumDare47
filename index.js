@@ -30,7 +30,7 @@ const channelIds = {
     '⛏': '761985528224022548',
     '⛏🎵': '761986307097493575',
     '🌋': '761985625363578910',
-    '🌋🎵': '761986404711530556'
+    '🌋🎵': '761986404711530556',
 };
 
 let cache = {};
@@ -76,6 +76,7 @@ const timeline = {
             amount: 25,
             room: '⛏'
         });
+        PlaySoundInVoiceChannel('⛏🎵', 'GoblinAppears.mp3');
     },
     [5]: () => {
         SendMessage('🌼', '🍪🐗 👉 💀💀💀');
@@ -93,7 +94,7 @@ const timeline = {
         SendMessage('⚓', '🧊🐛 👉 🤕');
     },
     [10]: () => {
-        // audio clue, in gardens voice,  that everyone dies in the desert at tick 16.
+        // audio clue, in gardens voice, that everyone dies in the desert at tick 16.
         PlaySoundInVoiceChannel('🌼🎵', 'desert_bomb_clue.mp3');
     },
     [11]: () => {
@@ -107,8 +108,8 @@ const timeline = {
         SendMessage('⚓', '🧨🛡 👉 ⛔');
     },
     [15]: () => {
-        // audio clue, in gardens voice, that everyone dies in the gardens at tick 26.
-        PlaySoundInVoiceChannel('🌼🎵', 'garden_bomb_clue.mp3');
+        // audio clue, in harbour voice, that everyone dies in the gardens at tick 26.
+        PlaySoundInVoiceChannel('⚓🎵', 'garden_bomb_clue.mp3');
     },
     [16]: () => {
         // DESERT BOMB
@@ -151,10 +152,18 @@ const timeline = {
         // MINE CLUE
         SendMessage('💀', '🗺 👉 ⛏');
     },
+    [31]: () => {
+        // RESURRECT THE DEAD.
+        SendMessage('💀', '🧙‍♂️ 💀👉😃');
+        setTimeout(() => {
+            MoveDeadPlayersToRoom('⚓');
+            SendMessage('⚓', '🧙‍♂️ 💀👉⚓');
+        }, 3000);
+    },
     [33]: () => {
         // VOLCANO BOMB
         SendMessage('🌋', '🌋🔥🔥');
-        PlaySoundInVoiceChannel('🌋', 'VolcanicEruption.mp3');
+        PlaySoundInVoiceChannel('🌋🎵', 'VolcanicEruption.mp3');
         setTimeout(() => {
             KillAllPlayersWithRole('🌋');
             SendMessage('💀', '🌋🔥🔥 👉 💀💀💀');
@@ -165,6 +174,17 @@ const timeline = {
         setTimeout(() => {
             SendMessage('💀', '🍪👺 👉 ⛔');
         }, 2000);
+    },
+    [35]: () => {
+        SpawnEnemies({
+            type: 'boar',
+            name: 'Wild Boar',
+            plural: 'Wild Boars',
+            icon: '🐗',
+            amount: 20,
+            room: '🌼'
+        });
+        PlaySoundInVoiceChannel('🌼🎵', 'WildBoarAppears.mp3');
     },
     [37]: () => {
         SpawnEnemies({
@@ -185,7 +205,7 @@ const timeline = {
         });
     },
     [40]: () => {
-        PlaySoundInVoiceChannel('🌵', 'SandWormAppears.mp3');
+        PlaySoundInVoiceChannel('🌵🎵', 'SandWormAppears.mp3');
         SpawnEnemies({
             type: 'sandworm',
             name: 'Sand Worm',
@@ -212,6 +232,17 @@ const timeline = {
     [43]: () => {
         SendMessage('🏰', '🪓🐉 👉 ⛔');
     },
+    [45]: () => {
+        SpawnEnemies({
+            type: 'goblin',
+            name: 'Goblin',
+            plural: 'Goblins',
+            icon: '👺',
+            amount: 15,
+            room: '🌵'
+        });
+        PlaySoundInVoiceChannel('🌵🎵', 'GoblinAppears.mp3');
+    },
     [46]: () => {
         SendMessage('⛏', '🚿🐛 👉 🤕🤕🤕');
     },
@@ -236,6 +267,7 @@ const timeline = {
             amount: 10,
             room: '🏰'
         });
+        PlaySoundInVoiceChannel('🏰🎵', 'KnightAppears.mp3');
     },
     [55]: () => {
         SpawnEnemies({
@@ -277,7 +309,7 @@ function OnLoopStart() {
             });
         }).catch(console.error);
     });
-    client.channels.cache.get(homeChannelId).send('⏰🌌');
+    client.channels.cache.get(homeChannelId).send('⏰🔄');
 }
 
 function ServerTick() {
@@ -290,8 +322,7 @@ function ServerTick() {
             client.user.setActivity(`${clockIcon}`);
             let enemies = GetEnemiesInRoom(room);
             enemies.forEach(enemy => {
-                let enemyName = (enemy.amount === 1) ? enemy.name : enemy.plural;
-                SendMessage(room, `There are ${enemy.amount} ${enemyName} still alive.`);
+                SendMessage(room, `😡❗ ${enemy.icon.repeat(enemy.amount)} ❗😡`);
             });
         });
     }
@@ -333,12 +364,12 @@ function RemoveRoleFromMember(member, roleName) {
     member.roles.remove(role);
 }
 
-function KillAllPlayersWithRole(roleName) {
+function MoveDeadPlayersToRoom(roomName) {
     client.guilds.fetch(guildId).then(guild => {
-        const role = GetRoleByName(guild, roleName);
-        role.members.forEach(member => {
-            RemoveRoleFromMember(member, roleName);
-            AddRoleToMember(member, '💀');
+        const deadRole = GetRoleByName(guild, '💀');
+        deadRole.members.forEach(member => {
+            RemoveRoleFromMember(member, '💀');
+            AddRoleToMember(member, roomName);
         });
     });
 }
@@ -361,7 +392,8 @@ function GotoRoom(message, room) {
     }
     roomRoles.forEach(role => RemoveRoleFromMember(message.member, role));
     AddRoleToMember(message.member, room);
-    message.member.voice.setChannel(GetChannelByName('🌼🎵')).catch(()=>{});
+    message.member.voice.setChannel(GetChannelByName(`${room}🎵`)).catch(()=>{});
+    message.channel.send(`${message.author} 🚶‍ 👉 ${room}`);
 }
 
 function SpawnEnemies(enemyData) {
@@ -369,32 +401,33 @@ function SpawnEnemies(enemyData) {
     cache.enemies.push(enemyData);
 }
 
-function AttackRoomEnemy(message, enemyType, damage, optionalMessage = '') {
+function AttackRoomEnemy(message, enemyType, damage) {
     let channelName = message.channel.name;
     let enemy = cache.enemies.find(el => {
         return (el.room === channelName) && (el.type === enemyType);
     });
     if (enemy) {
+        message.react('✅');
+        if (damage > 1) {
+            message.react('⭐');
+        }
         if (enemy.useHp) {
             enemy.hp -= damage;
             if (enemy.hp <= 0) {
                 let idx = cache.enemies.indexOf(enemy);
                 cache.enemies.splice(idx, 1);
-                message.channel.send(`${enemy.icon} 👉 💀`);
-            } else {
-                let prefix = (optionalMessage === '') ? '' : `${optionalMessage}\n`;
-                message.channel.send(`${prefix}${enemy.icon} 👉 ${enemy.hp}♥.`);
+                message.react('💀');
+                if (enemy.type === 'dragon') {
+                    message.react('👑');
+                    MakeWinners(message.channel);
+                }
             }
         } else {
             enemy.amount -= damage;
             if (enemy.amount <= 0) {
                 let idx = cache.enemies.indexOf(enemy);
                 cache.enemies.splice(idx, 1);
-                message.channel.send(`${enemy.icon} 👉 💀`);
-            } else {
-                let enemyNameText = (enemy.amount === 1) ? enemy.name : enemy.plural;
-                let prefix = (optionalMessage === '') ? '' : `${optionalMessage}\n`;
-                message.channel.send(`${prefix}😡 ${enemy.icon.repeat(enemy.amount)} 😡`);
+                message.react('💀');
             }
         }
     }
@@ -407,12 +440,27 @@ function GetEnemiesInRoom(room) {
     return enemies;
 }
 
+function KillPlayer(message) {
+    GotoRoom(message, '💀');
+    SendMessage(message.channel.name, `${message.author} 💀`);
+    SendMessage('💀', `${message.author} 💀`);
+}
+
+function KillAllPlayersWithRole(roleName) {
+    client.guilds.fetch(guildId).then(guild => {
+        const role = GetRoleByName(guild, roleName);
+        role.members.forEach(member => {
+            RemoveRoleFromMember(member, roleName);
+            AddRoleToMember(member, '💀');
+        });
+    });
+}
+
 function KillPlayerIfAnyEnemyExists(message, killChance = 0.5) { 
     let enemies = GetEnemiesInRoom(message.channel.name);
     let doDie = (Math.random() < killChance);
     if (enemies.length > 0 && doDie) {
-        GotoRoom(message, '💀');
-        SendMessage('💀', `Welcome to the dead, ${message.author}`);
+        KillPlayer(message);
     }
 }
 
@@ -421,16 +469,27 @@ function KillPlayerIfEnemyExists(message, enemyType, killChance = 1.0) {
     if (enemies.find(enemy => (enemy.type === enemyType) && (enemy.amount > 0))) {
         let doDie = (Math.random() < killChance);
         if (enemies.length > 0 && doDie) {
-            GotoRoom(message, '💀');
-            SendMessage('💀', `Welcome to the dead, ${message.author}`);
+            KillPlayer(message);
         }
     }
 }
 
 function PlaySoundInVoiceChannel(channelName, soundPath) {
-    GetChannelByName(channelName).join().then(connection => {
-        const dispatcher = connection.play(`assets/${soundPath}`);
-        dispatcher.on('error', console.error);
+    let channel = GetChannelByName(channelName);
+    if (channel) {
+        channel.join().then(connection => {
+            const dispatcher = connection.play(`assets/${soundPath}`);
+            dispatcher.on('error', console.error);
+        });
+    } else {
+        console.log(`Could not find channel ${channelName}`);
+    }
+}
+
+function MakeWinners(channel) {
+    channel.members.forEach(member => {
+        RemoveRoleFromMember(member, channel.name);
+        AddRoleToMember(member, '👑');
     });
 }
 
@@ -440,6 +499,7 @@ const msgCommands = {
         '🌵': function (message) { GotoRoom(message, '🌵'); },
         '🏰': function (message) {
             if (cache.castleLocked) {
+                message.react('❌');
                 message.channel.send("🏰🔒");
             } else {
                 GotoRoom(message, '🏰'); 
@@ -450,6 +510,7 @@ const msgCommands = {
         '🌋🛎': function (message) { GotoRoom(message, '🌋'); },
         '🌋': function (message) { message.channel.send('🚶‍♂️🌋❓'); },
         'default': function (message) {
+            message.react('❌');
             KillPlayerIfAnyEnemyExists(message);
         }
     },
@@ -502,9 +563,6 @@ const msgCommands = {
             KillPlayerIfEnemyExists(message, 'slime');
             KillPlayerIfEnemyExists(message, 'dragon');
         },
-        '💣': function (message) {
-            msgCommands['⚔']['🧨'](message);
-        },
         '🧊': function (message) {
             AttackRoomEnemy(message, 'sandworm', 1, '🧊🤕');
             KillPlayerIfEnemyExists(message, 'slime');
@@ -548,11 +606,8 @@ const msgCommands = {
         '🐁': function (message) {
             AttackRoomEnemy(message, 'dragon', 1, '🐁🤕');
         },
-        '🐭': function (message) {
-            msgCommands['⚔']['🐁'](message);
-        },
         '🍆': function (message) {
-            AttackRoomEnemy(message, 'dragon', 3, '🍆🤕🤕🤕');
+            AttackRoomEnemy(message, 'dragon', 10, '🍆🤕🤕🤕');
             KillPlayerIfEnemyExists(message, 'knight');
             KillPlayerIfEnemyExists(message, 'slime');
         },
@@ -564,6 +619,7 @@ const msgCommands = {
         },
         'default': function(message) {
             KillPlayerIfAnyEnemyExists(message);
+            message.react('❌');
         }
     },
     '🖐': {
@@ -581,11 +637,54 @@ const msgCommands = {
     }
 };
 
+const cmdAliases = {
+    '🚗': '🚶‍♂️',
+    '🦵': '🚶‍♂️',
+    '🚂': '🚶‍♂️',
+    '🚅': '🚶‍♂️',
+    '🚄': '🚶‍♂️',
+    '🚉': '🚶‍♂️',
+    '🛸': '🚶‍♂️',
+    '🚜': '🚶‍♂️',
+    '🚁': '🚶‍♂️',
+    '🚓': '🚶‍♂️',
+    '🚕': '🚶‍♂️',
+    '🛺': '🚶‍♂️',
+    '🚙': '🚶‍♂️',
+    '🚲': '🚶‍♂️',
+    '🛴': '🚶‍♂️',
+    '🏍': '🚶‍♂️',
+    '✈': '🚶‍♂️',
+};
+const argAliases = {
+    '🌻': '🌼',
+    '🥀': '🌼',
+    '🌷': '🌼',
+    '🌹': '🌼',
+    '🌸': '🌼',
+    '🌺': '🌼',
+    '🏜': '🌵',
+    '🏖': '🌵',
+    '🗻': '🌋',
+    '🏯': '🏰',
+    '🐭': '🐁',
+    '💣': '🧨'
+};
+
+function IsAlias(aliasList, predicateValue, msg) {
+    for (const [alias, value] of Object.entries(aliasList)) {
+        if (value === predicateValue && msg.includes(alias)) {
+            return true;
+        }
+    }
+    return false;
+};
+
 client.on('message', message => {
     if (message.author.bot) return;
 
     let validMessage = !nonEmojiPattern.test(message.content);
-    if (!validMessage) {
+    if (!validMessage && message.channel.name != '👑') {
         message.delete();
     }
     if (validMessage) {
@@ -593,12 +692,12 @@ client.on('message', message => {
         let msg = message.content.replace(/\s/, '');
         let foundCmd = false;
         for (const [cmd, cmdArgs] of Object.entries(msgCommands)) {
-            if (msg.startsWith(cmd)) {
+            if (msg.startsWith(cmd) || IsAlias(cmdAliases, cmd, msg)) {
                 foundCmd = true;
                 msg = msg.replace(cmd, '').replace(' ', '');
                 let foundArg = false;
                 for (const [cmdArg, func] of Object.entries(cmdArgs)) {
-                    if (msg.includes(cmdArg)) {
+                    if (msg.includes(cmdArg) || IsAlias(argAliases, cmdArg, msg)) {
                         func(message);
                         foundArg = true;
                         break;
