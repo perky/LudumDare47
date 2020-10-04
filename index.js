@@ -62,7 +62,8 @@ const timeline = {
             name: 'Wild Boar',
             plural: 'Wild Boars',
             icon: '🐗',
-            amount: 30,
+            image: 'Boar.png',
+            amount: 15,
             room: '🌼'
         });
         PlaySoundInVoiceChannel('🌼🎵', 'WildBoarAppears.mp3');
@@ -73,7 +74,8 @@ const timeline = {
             name: 'Goblin',
             plural: 'Goblins',
             icon: '👺',
-            amount: 25,
+            image: 'Goblin.png',
+            amount: 10,
             room: '⛏'
         });
         PlaySoundInVoiceChannel('⛏🎵', 'GoblinAppears.mp3');
@@ -85,6 +87,7 @@ const timeline = {
         // TODO: Trader appears.
         cache.trader = true;
         SendMessage('⚓', 'The Trader appears.');
+        PlaySoundInVoiceChannel('⚓🎵', 'TraderArrives.mp3');
     },
     [8]: () => {
         // CASTLE CLUE
@@ -181,7 +184,8 @@ const timeline = {
             name: 'Wild Boar',
             plural: 'Wild Boars',
             icon: '🐗',
-            amount: 20,
+            image: 'Boar.png',
+            amount: 10,
             room: '🌼'
         });
         PlaySoundInVoiceChannel('🌼🎵', 'WildBoarAppears.mp3');
@@ -192,15 +196,17 @@ const timeline = {
             name: 'Slime',
             plural: 'Slimes',
             icon: '🟩',
-            amount: 40,
+            image: 'Slime.png',
+            amount: 20,
             room: '⛏'
         });
         SpawnEnemies({
             type: 'slime',
             name: 'Slime',
             plural: 'Slimes',
+            image: 'Slime.png',
             icon: '🟩',
-            amount: 15,
+            amount: 5,
             room: '🌋'
         });
     },
@@ -212,7 +218,8 @@ const timeline = {
             plural: 'Sand Worms',
             amount: 1,
             icon: '🏜🐛',
-            hp: 50,
+            image: 'Sand_Worm.png',
+            hp: 25,
             useHp: true,
             room: '🌵'
         });
@@ -238,7 +245,8 @@ const timeline = {
             name: 'Goblin',
             plural: 'Goblins',
             icon: '👺',
-            amount: 15,
+            image: 'Goblin.png',
+            amount: 7,
             room: '🌵'
         });
         PlaySoundInVoiceChannel('🌵🎵', 'GoblinAppears.mp3');
@@ -264,7 +272,8 @@ const timeline = {
             name: 'Knight',
             plural: 'Knights',
             icon: '🛡',
-            amount: 10,
+            image: 'Knight.png',
+            amount: 5,
             room: '🏰'
         });
         PlaySoundInVoiceChannel('🏰🎵', 'KnightAppears.mp3');
@@ -275,11 +284,13 @@ const timeline = {
             name: 'Dragon',
             plural: 'Dragons',
             icon: '🐉',
+            image: 'Dragon.png',
             amount: 1,
-            hp: 100,
+            hp: 50,
             useHp: true,
             room: '🌋'
         });
+        PlaySoundInVoiceChannel('🌋🎵', 'DragonAppears.mp3');
     },
     [58]: () => {
         SendMessage('🌵', '🐁🐉 👉 🤕');
@@ -341,9 +352,14 @@ function ServerTick() {
     }
 }
 
-function SendMessage(channelName, message) { 
+function SendMessage(channelName, message, attachImage) { 
     const channel = GetChannelByName(channelName);
-    channel.send(message);
+    if (attachImage !== undefined) {
+        const attachment = new Discord.MessageAttachment(fs.readFileSync(`assets/${attachImage}`), attachImage);
+        channel.send(message, attachment);
+    } else {
+        channel.send(message);
+    }
 }
 
 function GetChannelByName(channelName) {
@@ -397,7 +413,7 @@ function GotoRoom(message, room) {
 }
 
 function SpawnEnemies(enemyData) {
-    SendMessage(enemyData.room, `😡‼ ${enemyData.icon.repeat(enemyData.amount)} ‼😡`);
+    SendMessage(enemyData.room, `😡‼ ${enemyData.icon.repeat(enemyData.amount)} ‼😡`, enemyData.image);
     cache.enemies.push(enemyData);
 }
 
@@ -417,9 +433,14 @@ function AttackRoomEnemy(message, enemyType, damage) {
                 let idx = cache.enemies.indexOf(enemy);
                 cache.enemies.splice(idx, 1);
                 message.react('💀');
+                message.channel.send(`💀 ${enemy.icon} 💀`);
                 if (enemy.type === 'dragon') {
                     message.react('👑');
                     MakeWinners(message.channel);
+                }
+            } else {
+                if (enemy.hp % 10 === 0) {
+                    message.channel.send(`😡‼ ${enemy.icon} ${'♥'.repeat(Math.floor(enemy.hp / 10))} ‼😡`);
                 }
             }
         } else {
@@ -428,6 +449,11 @@ function AttackRoomEnemy(message, enemyType, damage) {
                 let idx = cache.enemies.indexOf(enemy);
                 cache.enemies.splice(idx, 1);
                 message.react('💀');
+                message.channel.send(`💀 ${enemy.icon} 💀`);
+            } else {
+                if (enemy.amount % 5 === 0) {
+                    message.channel.send(`😡‼ ${enemy.icon.repeat(enemy.amount)} ‼😡`);
+                }
             }
         }
     }
@@ -626,6 +652,9 @@ const msgCommands = {
         '🎲': function (message) {
             const roll = Math.floor(Math.random() * 6) + 1;
             message.channel.send(`🎲 👉 ${roll}`);
+        },
+        '🧙‍♂️': function (message) {
+            RemoveRoleFromMember(message.member, '💀');
         }
     },
     '📃':{
