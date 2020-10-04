@@ -65,7 +65,7 @@ const timeline = {
             amount: 30,
             room: '🌼'
         });
-        PlaySoundInVoiceChannel('🌼🎵', 'WildBoarHerd.mp3');
+        PlaySoundInVoiceChannel('🌼🎵', 'WildBoarAppears.mp3');
     },
     [4]: () => {
         SpawnEnemies({
@@ -137,6 +137,7 @@ const timeline = {
     [26]: () => {
         // GARDENS BOMB
         SendMessage('🌼', '🧨⏰👿');
+        PlaySoundInVoiceChannel('🌼🎵', 'WildBoarHerd.mp3');
         setTimeout(() => {
             KillAllPlayersWithRole('🌼');
             SendMessage('💀', '🧨⏰ 👉 💀💀💀');
