@@ -41,6 +41,7 @@ function SetupCache() {
         locations: {},
         enemies: [],
         castleLocked: false,
+        trader: false,
         tick: 0,
         clockIndex: 0
     };
@@ -53,59 +54,72 @@ const timeline = {
         SendMessage('🏰', '🏰🔒');
     },
     [2]: () => {
-        SendMessage('🌼', '[Boar] 🪓 👉 💀');
+        SendMessage('🌼', '🪓🐗 👉 💀');
     },
     [3]: () => {
-        SendMessage('🌼', '30 Wild Boars appear!! They are agressive and start attacking you.');
-        cache.enemies.push({
+        SpawnEnemies({
             type: 'boar',
             name: 'Wild Boar',
             plural: 'Wild Boars',
+            icon: '🐗',
             amount: 30,
             room: '🌼'
         });
-        PlaySoundInVoiceChannel('🌵🎵', 'WildBoarHerd.mp3');
+        PlaySoundInVoiceChannel('🌼🎵', 'WildBoarHerd.mp3');
     },
     [4]: () => {
-        SendMessage('⛏', '25 Goblins appear!! They are agressive and start attacking you.');
-        cache.enemies.push({
+        SpawnEnemies({
             type: 'goblin',
             name: 'Goblin',
             plural: 'Goblins',
+            icon: '👺',
             amount: 25,
             room: '⛏'
         });
     },
     [5]: () => {
-
+        SendMessage('🌼', '🍪🐗 👉 💀💀💀');
     },
     [6]: () => {
         // TODO: Trader appears.
+        cache.trader = true;
         SendMessage('⚓', 'The Trader appears.');
     },
     [8]: () => {
         // CASTLE CLUE
         SendMessage('🌵', '🗺 👉 🏰');
     },
+    [9]: () => {
+        SendMessage('⚓', '🧊🐛 👉 🤕');
+    },
     [10]: () => {
-        // TODO: send audio clue, in gardens voice,  that everyone dies in the desert at tick 16.
-        PlaySoundInVoiceChannel('🌼🎵', 'placeholder.mp3');
+        // audio clue, in gardens voice,  that everyone dies in the desert at tick 16.
+        PlaySoundInVoiceChannel('🌼🎵', 'desert_bomb_clue.mp3');
+    },
+    [11]: () => {
+        SendMessage('⚓', '💰🛡 👉 💀💀💀');
     },
     [12]: () => {
         // DESERT CLUE
         SendMessage('🌼', '🗺 👉 🌵');
     },
+    [14]: () => {
+        SendMessage('⚓', '🧨🛡 👉 ⛔');
+    },
     [15]: () => {
-        // TODO: send audio clue, in gardens voice, that everyone dies in the gardens at tick 26.
-        PlaySoundInVoiceChannel('🌼🎵', 'placeholder.mp3');
+        // audio clue, in gardens voice, that everyone dies in the gardens at tick 26.
+        PlaySoundInVoiceChannel('🌼🎵', 'garden_bomb_clue.mp3');
     },
     [16]: () => {
         // DESERT BOMB
-        SendMessage('🌵', '💣👿');
+        SendMessage('🌵', '🧨⏰👿');
         setTimeout(() => {
             KillAllPlayersWithRole('🌵');
-            SendMessage('💀', '💣 👉 💀💀💀');
-        }, 1000);
+            SendMessage('💀', '🧨⏰ 👉 💀💀💀');
+        }, 2000);
+    },
+    [17]: () => {
+        SendMessage('🌼', '🔥👺 👉 💀💀💀');
     },
     [20]: () => {
         // UNLOCK CASTLE.
@@ -113,21 +127,24 @@ const timeline = {
         SendMessage('🏰', '🏰🔓');
         SendMessage('💀', '🏰🔓');
     },
+    [21]: () => {
+        SendMessage('🌵', '🔪🛡 👉 💀');
+    },
     [25]: () => {
         // 2/2 clue for volcanoe.
         SendMessage('⛏', '⛓ 👉 🛎');
     },
     [26]: () => {
         // GARDENS BOMB
-        SendMessage('🌼', '💣👿');
+        SendMessage('🌼', '🧨⏰👿');
         setTimeout(() => {
             KillAllPlayersWithRole('🌼');
-            SendMessage('💀', '💣 👉 💀💀💀');
-        }, 1000);
+            SendMessage('💀', '🧨⏰ 👉 💀💀💀');
+        }, 2000);
     },
     [29]: () => {
-        // TODO: send audio clue, in desert voice, that everyone dies in the volcanoe at tick 33.
-        PlaySoundInVoiceChannel('🌵🎵', 'placeholder.mp3');
+        // audio clue, in mine voice, that everyone dies in the volcanoe at tick 33.
+        PlaySoundInVoiceChannel('⛏🎵', 'volcano_eruption_clue.mp3');
     },
     [30]: () => {
         // MINE CLUE
@@ -136,48 +153,103 @@ const timeline = {
     [33]: () => {
         // VOLCANO BOMB
         SendMessage('🌋', '🌋🔥🔥');
+        PlaySoundInVoiceChannel('🌋', 'VolcanicEruption.mp3');
         setTimeout(() => {
             KillAllPlayersWithRole('🌋');
             SendMessage('💀', '🌋🔥🔥 👉 💀💀💀');
-        }, 1000);
+        }, 2000);
+    },
+    [34]: () => {
+        SendMessage('💀', '🪓👺 👉 ⛔');
+        setTimeout(() => {
+            SendMessage('💀', '🍪👺 👉 ⛔');
+        }, 2000);
+    },
+    [37]: () => {
+        SpawnEnemies({
+            type: 'slime',
+            name: 'Slime',
+            plural: 'Slimes',
+            icon: '🟩',
+            amount: 40,
+            room: '⛏'
+        });
+        SpawnEnemies({
+            type: 'slime',
+            name: 'Slime',
+            plural: 'Slimes',
+            icon: '🟩',
+            amount: 15,
+            room: '🌋'
+        });
     },
     [40]: () => {
-        SendMessage('🌵', 'A Sand Worm appears!! They are agressive and start attacking you.');
-        cache.enemies.push({
+        PlaySoundInVoiceChannel('🌵', 'SandWormAppears.mp3');
+        SpawnEnemies({
             type: 'sandworm',
             name: 'Sand Worm',
             plural: 'Sand Worms',
             amount: 1,
+            icon: '🏜🐛',
+            hp: 50,
+            useHp: true,
             room: '🌵'
         });
     },
+    [41]: () => {
+        SendMessage('💀', '💩🐗 👉 ⛔');
+        setTimeout(() => {
+            SendMessage('💀', '🍔🐗 👉 ⛔');
+        }, 2000);
+    },
+    [42]: () => {
+        SendMessage('⚓', '🔫👺 👉 💀');
+        setTimeout(() => {
+            SendMessage('⚓', '🗡👺 👉 💀');
+        }, 2000);
+    },
+    [43]: () => {
+        SendMessage('🏰', '🪓🐉 👉 ⛔');
+    },
+    [46]: () => {
+        SendMessage('⛏', '🚿🐛 👉 🤕🤕🤕');
+    },
     [50]: () => {
         // TODO: Trader dissapears.
+        cache.trader = false;
         SendMessage('⚓', 'The Trader has left.');
     },
     [52]: () => {
         // 1/2 clue for volcanoe.
-        SendMessage('🏰', '🗺⛓ 👉 🌋');
+        SendMessage('🏰', '🗺 👉 ⛓ 👉 🌋');
+    },
+    [53]: () => {
+        SendMessage('🌼', '🎷🐛 👉 ⛔');
     },
     [54]: () => {
-        SendMessage('🏰', '10 knights appear!! They are agressive and start attacking you.');
-        cache.enemies.push({
+        SpawnEnemies({
             type: 'knight',
             name: 'Knight',
             plural: 'Knights',
+            icon: '🛡',
             amount: 10,
             room: '🏰'
         });
     },
     [55]: () => {
-        SendMessage('🏰', 'A Dragon appears!! They are agressive and start attacking you.');
-        cache.enemies.push({
+        SpawnEnemies({
             type: 'dragon',
             name: 'Dragon',
             plural: 'Dragons',
+            icon: '🐉',
             amount: 1,
+            hp: 100,
+            useHp: true,
             room: '🌋'
         });
+    },
+    [58]: () => {
+        SendMessage('🌵', '🐁🐉 👉 🤕');
     },
     [59]: () => {
         roomRoles.forEach(room => SendMessage(room, '💫'));
@@ -291,21 +363,38 @@ function GotoRoom(message, room) {
     message.member.voice.setChannel(GetChannelByName('🌼🎵')).catch(()=>{});
 }
 
+function SpawnEnemies(enemyData) {
+    SendMessage(enemyData.room, `😡‼ ${enemyData.icon.repeat(enemyData.amount)} ‼😡`);
+    cache.enemies.push(enemyData);
+}
+
 function AttackRoomEnemy(message, enemyType, damage, optionalMessage = '') {
     let channelName = message.channel.name;
     let enemy = cache.enemies.find(el => {
         return (el.room === channelName) && (el.type === enemyType);
     });
     if (enemy) {
-        enemy.amount -= damage;
-        if (enemy.amount <= 0) {
-            let idx = cache.enemies.indexOf(enemy);
-            cache.enemies.splice(idx, 1);
-            message.channel.send(`The ${enemy.plural} have been defeated!`);
+        if (enemy.useHp) {
+            enemy.hp -= damage;
+            if (enemy.hp <= 0) {
+                let idx = cache.enemies.indexOf(enemy);
+                cache.enemies.splice(idx, 1);
+                message.channel.send(`${enemy.icon} 👉 💀`);
+            } else {
+                let prefix = (optionalMessage === '') ? '' : `${optionalMessage}\n`;
+                message.channel.send(`${prefix}${enemy.icon} 👉 ${enemy.hp}♥.`);
+            }
         } else {
-            let enemyNameText = (enemy.amount === 1) ? enemy.name : enemy.plural;
-            let prefix = (optionalMessage === '') ? '' : `${optionalMessage}\n`;
-            message.channel.send(`${prefix}${enemy.amount} ${enemyNameText} remain.`);
+            enemy.amount -= damage;
+            if (enemy.amount <= 0) {
+                let idx = cache.enemies.indexOf(enemy);
+                cache.enemies.splice(idx, 1);
+                message.channel.send(`${enemy.icon} 👉 💀`);
+            } else {
+                let enemyNameText = (enemy.amount === 1) ? enemy.name : enemy.plural;
+                let prefix = (optionalMessage === '') ? '' : `${optionalMessage}\n`;
+                message.channel.send(`${prefix}😡 ${enemy.icon.repeat(enemy.amount)} 😡`);
+            }
         }
     }
 }
@@ -317,12 +406,23 @@ function GetEnemiesInRoom(room) {
     return enemies;
 }
 
-function CheckToKillPlayer(message, killChance = 0.5) { 
+function KillPlayerIfAnyEnemyExists(message, killChance = 0.5) { 
     let enemies = GetEnemiesInRoom(message.channel.name);
     let doDie = (Math.random() < killChance);
     if (enemies.length > 0 && doDie) {
         GotoRoom(message, '💀');
         SendMessage('💀', `Welcome to the dead, ${message.author}`);
+    }
+}
+
+function KillPlayerIfEnemyExists(message, enemyType, killChance = 1.0) {
+    let enemies = GetEnemiesInRoom(message.channel.name);
+    if (enemies.find(enemy => (enemy.type === enemyType) && (enemy.amount > 0))) {
+        let doDie = (Math.random() < killChance);
+        if (enemies.length > 0 && doDie) {
+            GotoRoom(message, '💀');
+            SendMessage('💀', `Welcome to the dead, ${message.author}`);
+        }
     }
 }
 
@@ -349,31 +449,120 @@ const msgCommands = {
         '🌋🛎': function (message) { GotoRoom(message, '🌋'); },
         '🌋': function (message) { message.channel.send('🚶‍♂️🌋❓'); },
         'default': function (message) {
-            CheckToKillPlayer(message);
+            KillPlayerIfAnyEnemyExists(message);
         }
     },
     '⚔': {
         '🪓': function (message) {
-            AttackRoomEnemy(message, 'goblin', 1, 'A goblin is cleaved in half.');
-            AttackRoomEnemy(message, 'boar', 1, 'boar killed [placeholder]');
-            AttackRoomEnemy(message, 'knight', 1, 'knight killed [placeholder]');
-            AttackRoomEnemy(message, 'sandworm', 1, 'knight killed [placeholder]');
-            AttackRoomEnemy(message, 'dragon', 1, 'knight killed [placeholder]');
+            AttackRoomEnemy(message, 'boar', 1, '🪓💀');
+            KillPlayerIfEnemyExists(message, 'goblin');
+            KillPlayerIfEnemyExists(message, 'dragon');
+        },
+        '🔨': function (message) {
+            AttackRoomEnemy(message, 'boar', 1, '🔨💀');
+            KillPlayerIfEnemyExists(message, 'dragon');
+        },
+        '🍪': function (message) {
+            AttackRoomEnemy(message, 'boar', 3, '🍪💀💀💀');
+            AttackRoomEnemy(message, 'slime', 1, '🍪💀');
+            KillPlayerIfEnemyExists(message, 'goblin');
+        },
+        '🍫': function (message) {
+            AttackRoomEnemy(message, 'boar', 3, '🍫💀💀💀');
+            AttackRoomEnemy(message, 'slime', 1, '🍫💀');
+            KillPlayerIfEnemyExists(message, 'goblin');
+        },
+        '💩': function (message) { 
+            KillPlayerIfEnemyExists(message, 'boar');
+        },
+        '🍔': function (message) {
+            KillPlayerIfEnemyExists(message, 'boar');
+        },
+        '🔫': function (message) {
+            AttackRoomEnemy(message, 'goblin', 1, '🔫💀');
+            AttackRoomEnemy(message, 'dragon', 1, '🔫🤕');
+            KillPlayerIfEnemyExists(message, 'knight');
+        },
+        '🔪': function (message) { 
+            AttackRoomEnemy(message, 'goblin', 1, '🔪💀');
+            AttackRoomEnemy(message, 'knight', 1, '🔪💀');
+            KillPlayerIfEnemyExists(message, 'dragon');
         },
         '🔥': function (message) {
-            AttackRoomEnemy(message, 'goblin', 3, 'BOOM! The goblins explode in a fiery blast.');
+            AttackRoomEnemy(message, 'goblin', 4, '🔥💀💀💀💀');
+            AttackRoomEnemy(message, 'knight', 1, '🔥💀');
+            KillPlayerIfEnemyExists(message, 'dragon');
         },
-        '🗡️': function (message) {},
-        '🔫': function (message) {},
-        '🔪': function (message) {},
-        '💣': function (message) {},
+        '🧨': function (message) {
+            AttackRoomEnemy(message, 'sandworm', 1, '🧨🤕');
+            KillPlayerIfEnemyExists(message, 'boar');
+            KillPlayerIfEnemyExists(message, 'goblin');
+            KillPlayerIfEnemyExists(message, 'knight');
+            KillPlayerIfEnemyExists(message, 'slime');
+            KillPlayerIfEnemyExists(message, 'dragon');
+        },
+        '💣': function (message) {
+            msgCommands['⚔']['🧨'](message);
+        },
+        '🧊': function (message) {
+            AttackRoomEnemy(message, 'sandworm', 1, '🧊🤕');
+            KillPlayerIfEnemyExists(message, 'slime');
+        },
+        '🚿': function (message) {
+            AttackRoomEnemy(message, 'sandworm', 3, '🚿🤕🤕🤕');
+        },
+        '🌊': function (message) {
+            AttackRoomEnemy(message, 'sandworm', 3, '🌊🤕🤕🤕');
+        },
+        '🍉': function (message) {
+            AttackRoomEnemy(message, 'sandworm', 3, '🍉🤕🤕🤕');
+            KillPlayerIfEnemyExists(message, 'slime');
+        },
+        '🎷': function (message) {
+            AttackRoomEnemy(message, 'slime', 2, '🎷💀💀');
+            KillPlayerIfEnemyExists(message, 'sandworm');
+        },
+        '🎸': function (message) {
+            AttackRoomEnemy(message, 'slime', 2, '🎸💀💀');
+            KillPlayerIfEnemyExists(message, 'sandworm');
+        },
+        '🎻': function (message) {
+            AttackRoomEnemy(message, 'slime', 2, '🎻💀💀');
+            KillPlayerIfEnemyExists(message, 'sandworm');
+        },
+        '🎹': function (message) {
+            AttackRoomEnemy(message, 'slime', 2, '🎹💀💀');
+            KillPlayerIfEnemyExists(message, 'sandworm');
+        },
+        '🎺': function (message) {
+            AttackRoomEnemy(message, 'slime', 2, '🎺💀💀');
+            KillPlayerIfEnemyExists(message, 'sandworm');
+        },
+        '💰': function (message) {
+            AttackRoomEnemy(message, 'knight', 2, '💰💀💀');
+        },
+        '🤺': function (message) {
+            KillPlayerIfEnemyExists(message, 'knight');
+        },
+        '🐁': function (message) {
+            AttackRoomEnemy(message, 'dragon', 1, '🐁🤕');
+        },
+        '🐭': function (message) {
+            msgCommands['⚔']['🐁'](message);
+        },
+        '🍆': function (message) {
+            AttackRoomEnemy(message, 'dragon', 3, '🍆🤕🤕🤕');
+            KillPlayerIfEnemyExists(message, 'knight');
+            KillPlayerIfEnemyExists(message, 'slime');
+        },
         '🥄': function (message) {
-            CheckToKillPlayer(message, 1);
+            KillPlayerIfAnyEnemyExists(message, 1);
         },
-        '🚀': function (message) {},
-        '✂': function (message) {},
+        '✂': function (message) {
+            KillPlayerIfAnyEnemyExists(message, 1);
+        },
         'default': function(message) {
-            CheckToKillPlayer(message);
+            KillPlayerIfAnyEnemyExists(message);
         }
     },
     '🖐': {
@@ -384,11 +573,10 @@ const msgCommands = {
     },
     '📃':{
         '🎶': function (message){
-            JoinAllVoiceChannels(message);
         }
     },
     'default': function (message) {
-        CheckToKillPlayer(message);
+        KillPlayerIfAnyEnemyExists(message);
     }
 };
 
