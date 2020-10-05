@@ -11,6 +11,7 @@ const fs = require('fs');
 // Specify 48kHz sampling rate and 2 channel size.
 const encoder = new OpusEncoder(48000, 2);
 
+const millisecondsPerServerTick = 10000;
 const guildId = '761906017654538260';
 const homeChannelId = '761906017654538264';
 const nonEmojiPattern = /[A-Za-z0-9]/u;
@@ -52,9 +53,11 @@ const timeline = {
         // LOCK CASTLE
         cache.castleLocked = true;
         SendMessage('🏰', '🏰🔒');
+        client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️🌼');
     },
     [2]: () => {
         SendMessage('🌼', '🧩 ⚔🪓 👉 🐗');
+        client.channels.cache.get(homeChannelId).send('🧩 ⚔🪓 👉 🐗');
     },
     [3]: () => {
         SpawnEnemies({
@@ -62,7 +65,7 @@ const timeline = {
             name: 'Wild Boar',
             plural: 'Wild Boars',
             icon: '🐗',
-            image: 'Boar.png',
+            image: 'Boar_Idle.gif',
             reward: '🧩 🚶‍♂️🌵',
             amount: 15,
             room: '🌼'
@@ -75,12 +78,13 @@ const timeline = {
             name: 'Goblin',
             plural: 'Goblins',
             icon: '👺',
-            image: 'Goblin.png',
+            image: 'Goblin_Idle.gif',
             reward: '🧩 ⚔💰 👉 🛡',
             amount: 10,
             room: '⛏'
         });
         PlaySoundInVoiceChannel('⛏🎵', 'GoblinAppears.mp3');
+        client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️⚓');
     },
     [5]: () => {
         SendMessage('🌼', '🧩 ⚔🍪 👉⭐ 🐗');
@@ -163,6 +167,7 @@ const timeline = {
     [30]: () => {
         // MINE CLUE
         SendMessage('💀', '🧩 🗺⛏');
+        client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️🌼');
     },
     [31]: () => {
         // RESURRECT THE DEAD.
@@ -186,6 +191,7 @@ const timeline = {
         setTimeout(() => {
             SendMessage('💀', '🧩 ⚔🍪 👉⛔ 👺');
         }, 2000);
+        client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️⚓');
     },
     [35]: () => {
         SpawnEnemies({
@@ -193,7 +199,7 @@ const timeline = {
             name: 'Wild Boar',
             plural: 'Wild Boars',
             icon: '🐗',
-            image: 'Boar.png',
+            image: 'Boar_Idle.gif',
             reward: '🧩 ⚔🍉 👉 🐛',
             amount: 10,
             room: '🌼'
@@ -206,7 +212,7 @@ const timeline = {
             name: 'Slime',
             plural: 'Slimes',
             icon: '🟩',
-            image: 'Slime.png',
+            image: 'Slime_Idle.gif',
             reward: '🧩 ⚔🐁 👉 🐉',
             amount: 20,
             room: '⛏'
@@ -218,7 +224,7 @@ const timeline = {
             type: 'slime',
             name: 'Slime',
             plural: 'Slimes',
-            image: 'Slime.png',
+            image: 'Slime_Idle.gif',
             reward: '🧩 ⚔🔥 👉⛔ 🐉',
             icon: '🟩',
             amount: 5,
@@ -246,6 +252,7 @@ const timeline = {
         setTimeout(() => {
             SendMessage('💀', '🧩 ⚔🍔 👉⛔ 🐗');
         }, 2000);
+        client.channels.cache.get(homeChannelId).send('🧩 ⚔🪓 👉 🐗');
     },
     [42]: () => {
         SendMessage('⚓', '🧩 ⚔🔫 👉 👺');
@@ -257,27 +264,28 @@ const timeline = {
         SendMessage('🏰', '🧩 ⚔🪓 👉⛔ 🐉');
     },
     [45]: () => {
+        client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️🌼');
+    },
+    [46]: () => {
+        SendMessage('⛏', '🧩 ⚔🚿 👉⭐ 🐛');
+    },
+    [50]: () => {
         SpawnEnemies({
             type: 'goblin',
             name: 'Goblin',
             plural: 'Goblins',
             icon: '👺',
-            image: 'Goblin.png',
+            image: 'Goblin_Idle.gif',
             reward: '🧩 🚶‍♂️🏰',
             amount: 7,
             room: '🌵'
         });
         PlaySoundInVoiceChannel('🌵🎵', 'GoblinAppears.mp3');
     },
-    [46]: () => {
-        SendMessage('⛏', '🧩 ⚔🚿 👉⭐ 🐛');
-    },
-    [50]: () => {
-        
-    },
     [52]: () => {
         // 1/2 clue for volcanoe.
         SendMessage('🏰', '🧩 🗺🌋');
+        client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️⚓');
     },
     [53]: () => {
         SendMessage('🌼', '🧩  ⚔🎷 👉⛔ 🐛');
@@ -325,7 +333,7 @@ const timeline = {
 client.on('ready', () => {
     console.log('I am ready!');
     OnLoopStart();
-    setInterval(ServerTick, 5000);
+    setInterval(ServerTick, millisecondsPerServerTick);
 });
 
 function OnLoopStart() {
@@ -343,16 +351,20 @@ function OnLoopStart() {
 
 function ServerTick() {
     // CLEAR MESSAGES AND UPDATE CLOCK.
-    if (cache.tick === 0 || cache.tick % 5 === 0) {
+    if (cache.tick % 15 === 0) {
         roomRoles.forEach(room => {
             GetChannelByName(room).bulkDelete(100);
-            const clockIcon = clockfaces[Math.floor((cache.tick % 60) / 5)];
-            SendMessage(room, clockIcon);
-            client.user.setActivity(`${clockIcon}`);
             let enemies = GetEnemiesInRoom(room);
             enemies.forEach(enemy => {
                 SendMessage(room, `😡❗ ${enemy.icon.repeat(enemy.amount)} ❗😡`);
             });
+        });
+    }
+    if (cache.tick === 0 || cache.tick % 5 === 0) {
+        roomRoles.forEach(room => {
+            const clockIcon = clockfaces[Math.floor((cache.tick % 60) / 5)];
+            SendMessage(room, clockIcon);
+            client.user.setActivity(`${clockIcon}`);
         });
     }
 
@@ -418,10 +430,14 @@ function MemberHasRole(member, roleName) {
 
 function GotoRoom(message, room) {
     if (MemberHasRole(message.member, '💀')) {
+        message.react('❌');
+        message.react('💀');
         return;
     }
     if (MemberHasRole(message.member, '🏰') && cache.castleLocked) {
-        message.channel.send('🏰🔒');
+        message.react('❌');
+        message.react('🏰');
+        message.react('🔒');
         return;
     }
     roomRoles.forEach(role => RemoveRoleFromMember(message.member, role));
@@ -705,16 +721,25 @@ const msgCommands = {
             }
         }
     },
+    '🧩': {
+        'default': function (message) {
+            message.react('💀');
+            message.react('👉');
+            message.react('🐉');
+        }
+    },
     '📃':{
         '🎶': function (message){
         }
     },
     'default': function (message) {
+        message.react('❓');
         KillPlayerIfAnyEnemyExists(message, 0.1);
     }
 };
 
 const cmdAliases = {
+    '🚶': '🚶‍♂️',
     '🚶‍♀️': '🚶‍♂️',
     '🚗': '🚶‍♂️',
     '🦵': '🚶‍♂️',
@@ -747,6 +772,7 @@ const argAliases = {
     '🏜': '🌵',
     '🏖': '🌵',
     '🗻': '🌋',
+    '⛰': '🌋',
     '🏯': '🏰',
     '🐭': '🐁',
     '💣': '🧨',
