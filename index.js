@@ -53,11 +53,11 @@ const timeline = {
         // LOCK CASTLE
         cache.castleLocked = true;
         SendMessage('🏰', '🏰🔒');
-        client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️🌼');
+        //client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️🌼');
     },
     [2]: () => {
         SendMessage('🌼', '🧩 ⚔🪓 👉 🐗');
-        client.channels.cache.get(homeChannelId).send('🧩 ⚔🪓 👉 🐗');
+        //client.channels.cache.get(homeChannelId).send('🧩 ⚔🪓 👉 🐗');
     },
     [3]: () => {
         SpawnEnemies({
@@ -84,7 +84,7 @@ const timeline = {
             room: '⛏'
         });
         PlaySoundInVoiceChannel('⛏🎵', 'GoblinAppears.mp3');
-        client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️⚓');
+        //client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️⚓');
     },
     [5]: () => {
         SendMessage('🌼', '🧩 ⚔🍪 👉⭐ 🐗');
@@ -167,7 +167,7 @@ const timeline = {
     [30]: () => {
         // MINE CLUE
         SendMessage('💀', '🧩 🗺⛏');
-        client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️🌼');
+        //client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️🌼');
     },
     [31]: () => {
         // RESURRECT THE DEAD.
@@ -191,7 +191,7 @@ const timeline = {
         setTimeout(() => {
             SendMessage('💀', '🧩 ⚔🍪 👉⛔ 👺');
         }, 2000);
-        client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️⚓');
+        //client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️⚓');
     },
     [35]: () => {
         SpawnEnemies({
@@ -252,7 +252,7 @@ const timeline = {
         setTimeout(() => {
             SendMessage('💀', '🧩 ⚔🍔 👉⛔ 🐗');
         }, 2000);
-        client.channels.cache.get(homeChannelId).send('🧩 ⚔🪓 👉 🐗');
+        //client.channels.cache.get(homeChannelId).send('🧩 ⚔🪓 👉 🐗');
     },
     [42]: () => {
         SendMessage('⚓', '🧩 ⚔🔫 👉 👺');
@@ -264,7 +264,7 @@ const timeline = {
         SendMessage('🏰', '🧩 ⚔🪓 👉⛔ 🐉');
     },
     [45]: () => {
-        client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️🌼');
+        //client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️🌼');
     },
     [46]: () => {
         SendMessage('⛏', '🧩 ⚔🚿 👉⭐ 🐛');
@@ -285,7 +285,7 @@ const timeline = {
     [52]: () => {
         // 1/2 clue for volcanoe.
         SendMessage('🏰', '🧩 🗺🌋');
-        client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️⚓');
+        //client.channels.cache.get(homeChannelId).send('🧩  🚶‍♂️⚓');
     },
     [53]: () => {
         SendMessage('🌼', '🧩  ⚔🎷 👉⛔ 🐛');
@@ -309,7 +309,7 @@ const timeline = {
             name: 'Dragon',
             plural: 'Dragons',
             icon: '🐉',
-            image: 'Dragon.png',
+            image: 'Dragon_Idle.gif',
             reward: '👑',
             amount: 1,
             hp: 50,
@@ -346,7 +346,12 @@ function OnLoopStart() {
             });
         }).catch(console.error);
     });
-    client.channels.cache.get(homeChannelId).send('⏰🔄');
+    //client.channels.cache.get(homeChannelId).send('⏰🔄');
+}
+
+function GetTimeAsEmoji() {
+    const clockIcon = clockfaces[Math.floor((cache.tick % 60) / 5)];
+    return clockIcon;
 }
 
 function ServerTick() {
@@ -362,7 +367,7 @@ function ServerTick() {
     }
     if (cache.tick === 0 || cache.tick % 5 === 0) {
         roomRoles.forEach(room => {
-            const clockIcon = clockfaces[Math.floor((cache.tick % 60) / 5)];
+            const clockIcon = GetTimeAsEmoji();
             SendMessage(room, clockIcon);
             client.user.setActivity(`${clockIcon}`);
         });
@@ -715,6 +720,10 @@ const msgCommands = {
         }
     },
     '👋': {
+        '⌚': function (message) {
+            message.react('✅');
+            message.channel.send(GetTimeAsEmoji());
+        },
         'default': function (message) {
             if (message.channel.name === '⚓' && cache.trader) {
                 message.react('👋');
@@ -723,9 +732,16 @@ const msgCommands = {
     },
     '🧩': {
         'default': function (message) {
-            message.react('💀');
-            message.react('👉');
-            message.react('🐉');
+            const responses = [
+                '☠🐲☠',
+                '🚶‍♂️🌼',
+                '🚶‍♂️⚓',
+                '⚔🪓 👉 🐗',
+                '⚔🔪 👉 👺'
+            ];
+            message.react('✅');
+            let idx = Math.floor(Math.random() * response.length);
+            message.channel.send(response[idx]);
         }
     },
     '📃':{
